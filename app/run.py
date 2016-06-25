@@ -1,12 +1,12 @@
 from flask import Flask
 from flask_apscheduler import APScheduler
+from gmail_modeling import update_model
 
 class Config(object):
     JOBS = [
         {
-            'id': 'job1',
-            'func': '__main__:job1',
-            'args': (1, 2),
+            'id': 'job_modelupate',
+            'func': '__main__:update_model',
             'trigger': 'interval',
             'seconds': 10
         }
@@ -14,15 +14,14 @@ class Config(object):
 
     SCHEDULER_VIEWS_ENABLED = True
 
-def job1(a, b):
-    print(str(a) + ' ' + str(b))
-
-
 app = Flask(__name__)
 app.config.from_object(Config())
+app.debug = True
 
 scheduler = APScheduler()
-scheduler.init_app(app)
-scheduler.start()
 
-app.run()
+if __name__ == "__main__":
+    scheduler.init_app(app)
+    scheduler.start()
+    
+    app.run()

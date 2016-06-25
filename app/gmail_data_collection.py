@@ -126,7 +126,16 @@ def request_messages(service, messages):
         print "Executing batch request {} of {}...".format(i+1, batch_size)
         batch.execute()
 
-def collect_messages(after_date):
+def collect_messages(after_date = None):
+    '''
+    Collects all the messages in the user's inbox
+    
+    Arguments:
+        after_date - only pulls messages that arrive after the specified date
+    
+    Returns:
+        A list of messages (as dicts) from the user's mailbox.
+    '''
     service = create_service()
     
     message_ids = request_message_ids(service, after_date)
