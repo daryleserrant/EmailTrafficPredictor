@@ -73,7 +73,7 @@ def messages_to_dataframe(messages):
         threads - a list of messages retrieved from the GMAIL API
     
     Returns:
-        a pandas data frame
+        a pandas data frame, None if the message list provided is empty
     '''
     history_id = []
     msg_id = []
@@ -88,6 +88,10 @@ def messages_to_dataframe(messages):
     size_estimate = []
     snippet = []
     thread_id = []
+    
+    # Return None if the message list is empty
+    if not messages:
+        return None
     
     for m in messages:
         # Check for NoneTypes and integers. The GMAIL API will return None for any message it could not
@@ -168,7 +172,7 @@ def messages_to_dataframe(messages):
     
     return df.drop('label_ids', axis=1)
 
-def aggregate_mail_counts(df, by='hour')
+def aggregate_mail_counts(df, by='hour'):
     '''
     Aggregates mail counts hourly or daily.
     
@@ -183,7 +187,7 @@ def aggregate_mail_counts(df, by='hour')
         return featurize_hourly(df)
     elif by == 'day':
         return featurize_daily(df)
-    else
+    else:
         return None    
     
 def aggregate_hourly(df):
@@ -208,7 +212,7 @@ def aggregate_hourly(df):
             hourly_counts[dt] = 0  
     return hourly_counts
 
-def aggregate_daily(df)
+def aggregate_daily(df):
     '''
     Aggregates mail counts daily.
     

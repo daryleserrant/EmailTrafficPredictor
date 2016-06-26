@@ -76,14 +76,14 @@ def request_message_ids(service, after_date = None):
     Returns:
         A list of dictionaries that contain the id of a single message
     '''
-    
     query = None
+    
     if after_date:
-        query = 'after:{}'.format(after_date.strftime('%Y/%m/%d')
+        query = 'after:{}'.format(after_date.strftime('%Y/%m/%d'))
     
-    response = service.users().messages().list(userId='me',q=query)execute()
+    response = service.users().messages().list(userId='me',q=query).execute()
     messages = []
-    
+
     print "Requesting message ids..."
     
     if 'messages' in response:
@@ -93,7 +93,7 @@ def request_message_ids(service, after_date = None):
         page_token = response['nextPageToken']
         response = service.users().messages().list(userId='me',q=query, pageToken=page_token).execute()
         messages.extend(response['messages'])
-    
+            
     return messages
 
 def request_messages(service, messages):
