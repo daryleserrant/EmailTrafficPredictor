@@ -6,7 +6,6 @@ from operator import itemgetter
 from multiprocessing import Pool
 from functools import partial
 from statsmodels.tsa.statespace.sarimax import SARIMAX
-from gmail_traffic_forecaster import Forecaster
 
 HOURLY_PERIOD = 24
 WEEKLY_PERIOD = 7
@@ -150,39 +149,3 @@ def build_weekly_arima_model(ts, params=None):
     Q = params['Q']
     
     return SARIMAX(train, order=(p,d,q), seasonal_order=(P,D,Q,WEEKLY_PERIOD)).fit()
-    
-def update_models(date, wkly_model, hrly_model):
-
-    # Collect the latest messages from the inbox and convert it into a format we can work with
-    messages = gdp.messages_to_dataframe(gdc.collect_messages(date))
-    
-    # Remove all google hangout chat messages and messages that were sent by the user
-    messages = messages[~messages['is_sent'] & ~messages['is_chat']]
-    
-    # Retrieve daily and hourly time series data used to train the old models,
-    # and trim off the oldest seasonal data. 
-    
-    # Todo: Instead of storing the data into a file, store data in MongoDB or postgres.
-    # That way we don't need to get rid of any data.
-    with open('../data/daily_ts.pkl', 'r') as f:
-        daily_ts = pickle.load(f)[7:]
-    
-    with open('../data/hourly_ts.pkl', 'r') as f:
-        hourly_ts = pickle.load(f)[24:]
-    
-    # Append the recent data to the time series.
-    daily_ts = pd.concat([daily_ts, gdp.aggregate_mail_counts(messages, by='day')],axis=0)
-    hourly_ts = pd.concat([hourly_ts, gdp.aggregate_mail_counts(messages, by='hour')],axis=0)
-    
-    # Update models
-    wkly_model.update(build_weekly_arima_model(daily_ts))
-    hrly_model.update(build_hourly_arima_model(hourly_ts))
-    
-    # Save new data to files. 
-    with open('../data/daily_ts.pkl', 'w') as f:
-        pickle.dump(daily_ts,f)
-    
-    with open('../data/hourly_ts.pkl', 'w') as f:
-        pickle.dump(hourly_ts,f)
-        
-    print 'Model updated'
