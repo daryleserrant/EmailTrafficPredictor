@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import cPickle as pickle
 from datetime import datetime
+import time
 import pytz
 
 def get_unique_labels(data):
@@ -184,9 +185,9 @@ def aggregate_mail_counts(df, by='hour'):
         a timeseries object containing the aggregated counts
     '''
     if by == 'hour':
-        return featurize_hourly(df)
+        return aggregate_hourly(df)
     elif by == 'day':
-        return featurize_daily(df)
+        return aggregate_daily(df)
     else:
         return None    
     
@@ -224,7 +225,7 @@ def aggregate_daily(df):
     '''            
     daily_agg = df[['year','month','day','msg_id']].groupby(['year','month','day']).count()
     
-    daily_index = pd.date_range(df['date'].min(), df['date'].max(), freq='D')
+    daily_index = pd.date_range(df['date'].min(), df['date'].max(), freq='D', normalize=True)
     daily_counts = pd.Series(0, index=daily_index)
     
     for dt in daily_index:

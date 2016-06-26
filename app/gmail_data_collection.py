@@ -67,19 +67,22 @@ def request_threads(service):
     
     return threads
 
-def request_message_ids(service, after_date = None):
+def request_message_ids(service, date_range = None):
     '''
     Retrieves all message ids from the user's GMAIL account.
     
     Arguments:
         service - A GMAIL API Service object
+        date_range - If specified, returns emails that arrived within a date range
     Returns:
         A list of dictionaries that contain the id of a single message
     '''
     query = None
     
-    if after_date:
-        query = 'after:{}'.format(after_date.strftime('%Y/%m/%d'))
+    if date_range:
+        before = date_range[0].strftime('%Y/%m/%d')
+        after = date_range[1].strftime('%Y/%m/%d')
+        query = 'before:{} and after:{}'.format(before,after)
     
     response = service.users().messages().list(userId='me',q=query).execute()
     messages = []
@@ -126,26 +129,28 @@ def request_messages(service, messages):
         print "Executing batch request {} of {}...".format(i+1, batch_size)
         batch.execute()
 
-def collect_messages(after_date = None):
+def collect_messages(date_range):
     '''
     Collects all the messages in the user's inbox
     
     Arguments:
-        after_date - only pulls messages that arrive after the specified date
+        date_range - only pulls messages that arrive within a date range. Specified as a tuple:
+                     (before_date, after_date)
     
     Returns:
         A list of messages (as dicts) from the user's mailbox.
     '''
     service = create_service()
     
-    message_ids = request_message_ids(service, after_date)
+    message_ids = request_message_ids(service, date_range)
     
     # Empty list
+    global emails
     emails = []
     
     request_messages(service, message_ids)
     
-    return emails.copy()
+    return emails[:]
     
         
 if __name__ == '__main__':
