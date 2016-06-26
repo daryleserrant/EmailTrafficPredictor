@@ -9,6 +9,14 @@ import cPickle as pickle
 import sys
 
 def create_timeseries_data(messages):
+    '''
+    Create daily and hourly time series data using the email messages returned from the GMAIL API
+    
+    Arguments:
+        messages - a list of messages (implemented as dicts)
+    Returns:
+        A tuple containing the daily and hourly time series data
+    '''
     df = gdp.messages_to_dataframe(messages)
     
     if df == None:
@@ -27,6 +35,16 @@ def create_timeseries_data(messages):
     return (daily_counts, hourly_counts)
     
 def merge_timeseries_data(ts_A, ts_B):
+    '''
+    Merge two time series objects together into one time series object.
+    
+    Arguments:
+        ts_A, ts_B - Two time series objects
+    Returns:
+        Combination of both time series. Time series B merged into time series A.
+        In the case of duplicate indicies, the data in time series A will be replaced
+        with time series B data.
+    '''
     merged = ts_A[:]
     for dt,cnt in ts_B.iteritems():
         if dt in merged:
