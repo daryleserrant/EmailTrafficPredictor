@@ -33,6 +33,9 @@ app = Flask(__name__)
 app.config.from_object(Config())
 app.debug = True
 
+HOURLY_FORECAST_STEPS = 24
+WEEKLY_FORECAST_STEPS = 28
+
 def check_for_updates():
     '''
     Periodically poll the model pickle files for updates by examining the modified
@@ -69,23 +72,28 @@ def index():
 @app.route('/weekly_forecast')
 def forecast_weekly_traffic():
     if mutex.acquire():
-        weekly_model.forecast(steps=28)
+        fc = weekly_model.forecast(steps=WEEKLY_FORECAST_STEPS)
         mutex.release()
         return 'Weekly Forecast'
     else:
-        return 'We are updating our models. Check back after a few minutes...'
+        return 'We are updating the forecast models. Check back after a few minutes...'
 
 @app.route('/hourly_forecast')
 def forecast_hourly_traffic():
     if mutex.acquire():
-        hourly_model.forecast(steps=24)
+        fc = hourly_model.forecast(steps=HOURLY_FORECAST_STEPS)
         mutex.release()
         return 'Hourly Forecast'
     else:
-        return 'We are updating our models. Check back after a few minutes...'
+        return 'We are updating the forecast models. Check back after a few minutes...'
 
 if __name__ == "__main__":
-
+    '''
+    Application Entry Point. Invoked by the terminal command: "python run.py <hourly model> <weekly model>"
+        Arguments:
+            hourly model - The path to the hourly model pickle file
+            weekly model - The path to the weekly model pickle file
+    '''
     global hourly_model_file, weekly_model_file, last_hr_mtime, last_wk_mtime
     
     hourly_model_file = sys.argv[1]
