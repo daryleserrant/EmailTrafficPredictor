@@ -19,7 +19,7 @@ def create_timeseries_data(messages):
     '''
     df = gdp.messages_to_dataframe(messages)
     
-    if df == None:
+    if df is None:
         hourly_index = pd.date_range(last_updated.floor('H'),datetime.utcnow().replace(minute=0, second=0, microsecond=0), freq='H')
         hourly_counts = pd.Series(0, index=hourly_index)
         
@@ -66,8 +66,8 @@ def save_training_data(daily_ts, hourly_ts):
     hourly_ts.to_pickle('../data/hourly_ts.pkl')    
 
 if __name__ == "__main__":
-    weekly_model_file = 'weekly_model.pkl'
-    hourly_model_file = 'hourly_model.pkl'
+    weekly_model_file = '../models/weekly_model.pkl'
+    hourly_model_file = '../models/hourly_model.pkl'
     
     daily_ts, hourly_ts = load_training_data()
     
