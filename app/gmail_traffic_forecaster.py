@@ -3,19 +3,19 @@ import numpy as np
 import cPickle as pickle
 from statsmodels.tsa.statespace.sarimax import SARIMAX, SARIMAXResults
 
-def Forecaster(object):
+class Forecaster(object):
     
-    def __init__(self, model=None):
-        self.model = model
+    def __init__(self):
+        self.model = None
     
     def update(self, model):
         self.model = model
     
     def forecast(self, fc_steps):
-        model.forecast(steps=fc_steps)
+        return self.model.forecast(steps=fc_steps)
     
     def get_residuals(self):
-        return model.resid
+        return self.model.resid
     
     def load(self, filepath):
         self.model = SARIMAXResults.load(filepath)

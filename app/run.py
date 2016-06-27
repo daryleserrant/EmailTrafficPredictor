@@ -1,7 +1,8 @@
 from flask import Flask
 from flask_apscheduler import APScheduler
 from gmail_traffic_forecaster import Forecaster
-from multithreading import Lock
+from threading import Lock
+import logging
 
 import os
 import sys
@@ -27,7 +28,7 @@ weekly_model_file = None
 weekly_model = Forecaster()
 hourly_model = Forecaster()
 
-mutex = Lock(blocking=False)
+mutex = Lock()
 
 app = Flask(__name__)
 app.config.from_object(Config())
@@ -52,7 +53,7 @@ def check_for_updates():
             # Wait for the lock to be available
             while not mutex.acquire():
                 pass
-          
+            print "Reloading forecast models..."
             weekly_model.load(weekly_model_file)
             hourly_model.load(hourly_model_file)
             mutex.release()
@@ -71,8 +72,8 @@ def index():
     
 @app.route('/weekly_forecast')
 def forecast_weekly_traffic():
-    if mutex.acquire():
-        fc = weekly_model.forecast(steps=WEEKLY_FORECAST_STEPS)
+    if mutex.acquire(False):
+        fc = weekly_model.forecast(WEEKLY_FORECAST_STEPS)
         mutex.release()
         return 'Weekly Forecast'
     else:
@@ -80,8 +81,8 @@ def forecast_weekly_traffic():
 
 @app.route('/hourly_forecast')
 def forecast_hourly_traffic():
-    if mutex.acquire():
-        fc = hourly_model.forecast(steps=HOURLY_FORECAST_STEPS)
+    if mutex.acquire(False):
+        fc = hourly_model.forecast(HOURLY_FORECAST_STEPS)
         mutex.release()
         return 'Hourly Forecast'
     else:
@@ -94,10 +95,9 @@ if __name__ == "__main__":
             hourly model - The path to the hourly model pickle file
             weekly model - The path to the weekly model pickle file
     '''
-    global hourly_model_file, weekly_model_file, last_hr_mtime, last_wk_mtime
     
-    hourly_model_file = sys.argv[1]
-    weekly_model_file = sys.argv[2]
+    weekly_model_file = sys.argv[1]
+    hourly_model_file = sys.argv[2]
     
     last_hr_mtime = os.stat(hourly_model_file).st_mtime
     last_wk_mtime = os.stat(weekly_model_file).st_mtime
