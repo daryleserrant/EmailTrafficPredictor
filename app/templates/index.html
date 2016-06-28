@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Email Traffic Forecasts</title>
+    <link rel="stylesheet" href="styles.css" type="text/css" />
+  </head>
+  <body>
+    <div id="header">
+      <img src="icon_50.png" />
+      <h1>Email Traffic Predictor</h1>
+    </div>
+    <div id="row">
+      <div id="pnl_left">
+        <div id = "date_time_disp">
+          <span class="time">{{ day_of_week }}</span>
+          <span class="date">{{ fc_date }}</span>
+        </div>
+        
+        <h1>Weekly Forecast</h1>
+        <div id = "weekly_pnl">
+          <img src="wkly_plt.png" alt="Weekly Forecast" width="500"/>  
+        </div> 
+      </div>
+      <div id="hourly_pnl">
+        <h1>Today's Forecast</h1>
+        <img src="hrly_plt.png" alt="Hourly Forecast" width="800" height="400"/>
+      </div>
+    </div>
+  </body>
+</html>

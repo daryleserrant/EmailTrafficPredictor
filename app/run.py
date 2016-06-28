@@ -1,7 +1,13 @@
 from flask import Flask
 from flask_apscheduler import APScheduler
+from flask import render_template
 from gmail_traffic_forecaster import Forecaster
 from threading import Lock
+from datetime import datetime
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sbn
+from StringIO import StringIO
 import logging
 
 import os
@@ -68,25 +74,42 @@ scheduler = APScheduler()
 @app.route('/')
 @app.route('/index')
 def index():
-    return 'Hello,World!'
-    
-@app.route('/weekly_forecast')
-def forecast_weekly_traffic():
     if mutex.acquire(False):
-        fc = weekly_model.forecast(WEEKLY_FORECAST_STEPS)
-        mutex.release()
-        return 'Weekly Forecast'
-    else:
-        return 'We are updating the forecast models. Check back after a few minutes...'
+        return render_template('index.html',
+            day_of_week = datetime.strftime(datetime.now(), '%A'),
+            fc_date = datetime.strftime(datetime.now(), '%B %d, %Y'))
+        else:
+            return 'We are updating the forecast models. Check back after a few minutes...'
+    
+@app.route('/weekly_pnl')
+def forecast_weekly_traffic():
+    fc = weekly_model.forecast(WEEKLY_FORECAST_STEPS)
+    x_pos = [dt.to_datetime().weekday() for dt in fc.index]
+    y_pos = fc.tolist()
+    labels = [dt.to_datetime().strftime('%a') for dt in fc.index]
+    plt.bar(x_pos,y_pos,alpha=0.5, align='center')
+    plt.xticks(x_pos,labels)
+    plt.tick_params(axis='x', labelsize=10)
+    image = StringIO()
+    plt.savefig(image)
+    return image.getvalue(), 200, {'Content-Type': 'image/png'}
+
 
 @app.route('/hourly_forecast')
 def forecast_hourly_traffic():
-    if mutex.acquire(False):
-        fc = hourly_model.forecast(HOURLY_FORECAST_STEPS)
-        mutex.release()
-        return 'Hourly Forecast'
-    else:
-        return 'We are updating the forecast models. Check back after a few minutes...'
+    fc = hourly_model.forecast(HOURLY_FORECAST_STEPS)
+    mutex.release()
+    x_pos = [dt.to_datetime().hour for dt in fc.index]
+    y_pos = fc.tolist()
+    labels = ['12AM','1AM','2AM','3AM','4AM','5AM','6AM','7AM','8AM','9AM','10AM','11AM','12PM','1PM','2PM','3PM','4PM','5PM','6PM',
+          '7PM','8PM','9PM','10PM','11PM']
+    plt.fill_between(x_pos,y_pos,alpha=0.3)
+    for dt, cnt in zip(x_pos,y_pos):
+       plt.text(dt, cnt, str(cnt),horizontalalignment='center', fontdict=text_font)
+    plt.yticks([]);
+    image = StringIO()
+    plt.savefig(image)
+    return image.getvalue(), 200, {'Content-Type': 'image/png'}
 
 if __name__ == "__main__":
     '''
