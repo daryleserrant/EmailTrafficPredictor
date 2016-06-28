@@ -3,7 +3,7 @@
   "description": "Chrome Application that forecasts your email traffic!",
   "version": "1.0",
   "manifest_version": 2,
-  "icons": { "16": "calculator-16.png", "128": "calculator-128.png" },
+  "icons": { "16": "icon_16.png", "128": "icon_128.png" },
   "app": {
      "urls": [
      "http://127.0.0.1:5000"

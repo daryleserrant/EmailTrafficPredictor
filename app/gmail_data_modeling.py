@@ -10,7 +10,7 @@ from statsmodels.tsa.statespace.sarimax import SARIMAX
 HOURLY_PERIOD = 24
 WEEKLY_PERIOD = 7
 
-DEFAULT_HOURLY_PARAMS = {'p':0,'d':1,'q':24,'P':1,'D':1,'Q':2}
+DEFAULT_HOURLY_PARAMS = {'p':0,'d':1,'q':10,'P':1,'D':1,'Q':2}
 DEFAULT_WEEKLY_PARAMS = {'p':3,'d':1,'q':6,'P':0,'D':1,'Q':0}
 
 def test_stationarity(timeseries):

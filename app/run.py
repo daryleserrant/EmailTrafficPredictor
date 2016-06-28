@@ -74,14 +74,11 @@ scheduler = APScheduler()
 @app.route('/')
 @app.route('/index')
 def index():
-    if mutex.acquire(False):
-        return render_template('index.html',
-            day_of_week = datetime.strftime(datetime.now(), '%A'),
-            fc_date = datetime.strftime(datetime.now(), '%B %d, %Y'))
-        else:
-            return 'We are updating the forecast models. Check back after a few minutes...'
+    return render_template('index.html',
+        day_of_week = datetime.strftime(datetime.now(), '%A'),
+        fc_date = datetime.strftime(datetime.now(), '%B %d, %Y'))
     
-@app.route('/weekly_pnl')
+@app.route('/wkly_plt.png')
 def forecast_weekly_traffic():
     fc = weekly_model.forecast(WEEKLY_FORECAST_STEPS)
     x_pos = [dt.to_datetime().weekday() for dt in fc.index]
@@ -92,17 +89,14 @@ def forecast_weekly_traffic():
     plt.tick_params(axis='x', labelsize=10)
     image = StringIO()
     plt.savefig(image)
-    return image.getvalue(), 200, {'Content-Type': 'image/png'}
+    return image.getvalue(), 200, {'Content-Type': 'image/png'}    
 
-
-@app.route('/hourly_forecast')
+@app.route('/hrly_plt.png')
 def forecast_hourly_traffic():
     fc = hourly_model.forecast(HOURLY_FORECAST_STEPS)
-    mutex.release()
     x_pos = [dt.to_datetime().hour for dt in fc.index]
     y_pos = fc.tolist()
-    labels = ['12AM','1AM','2AM','3AM','4AM','5AM','6AM','7AM','8AM','9AM','10AM','11AM','12PM','1PM','2PM','3PM','4PM','5PM','6PM',
-          '7PM','8PM','9PM','10PM','11PM']
+    labels = [dt.to_datetime().strftime('%I%p') for dt in fc.index]
     plt.fill_between(x_pos,y_pos,alpha=0.3)
     for dt, cnt in zip(x_pos,y_pos):
        plt.text(dt, cnt, str(cnt),horizontalalignment='center', fontdict=text_font)
@@ -115,8 +109,8 @@ if __name__ == "__main__":
     '''
     Application Entry Point. Invoked by the terminal command: "python run.py <hourly model> <weekly model>"
         Arguments:
-            hourly model - The path to the hourly model pickle file
             weekly model - The path to the weekly model pickle file
+            hourly model - The path to the hourly model pickle file
     '''
     
     weekly_model_file = sys.argv[1]

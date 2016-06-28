@@ -5,6 +5,7 @@ import gmail_data_processing as gdp
 import gmail_data_modeling as gdm
 from datetime import datetime, timedelta
 from statsmodels.tsa.statespace.sarimax import SARIMAX
+from dateutil.relativedelta import relativedelta
 import cPickle as pickle
 import sys
 
@@ -27,7 +28,10 @@ def create_timeseries_data(messages):
         daily_counts = pd.Series(0, index=daily_index)
     else:
         # Remove all google hangout chat messages and messages that were sent by the user
-        df = df[~df['is_sent'] & ~df['is_chat']]        
+        if 'is_sent' in df:
+            df = df[~df['is_sent']]
+        if 'is_chat' in df:
+            df = df[~df['is_chat']]
         
         hourly_counts = gdp.aggregate_mail_counts(df, by='hour')
         daily_counts = gdp.aggregate_mail_counts(df, by='day')
@@ -55,8 +59,13 @@ def merge_timeseries_data(ts_A, ts_B):
     return merged
 
 def load_training_data():
-    daily_ts = pd.read_pickle('../data/daily_ts.pkl')[1:]
-    hourly_ts = pd.read_pickle('../data/hourly_ts.pkl')[24:]
+    daily_ts = pd.read_pickle('../data/daily_ts.pkl')
+    hourly_ts = pd.read_pickle('../data/hourly_ts.pkl')
+    
+    today = datetime.utcnow().replace(hour=0,minute=0, second=0, microsecond=0)
+    
+    hourly_ts = hourly_ts[hourly_ts.index > (today - relativedelta(months=+6))]
+    daily_ts = daily_ts[daily_ts.index > (today - relativedelta(years=+2))]
     
     return (daily_ts, hourly_ts)
 
