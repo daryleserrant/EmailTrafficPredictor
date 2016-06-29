@@ -75,34 +75,36 @@ scheduler = APScheduler()
 @app.route('/index')
 def index():
     return render_template('index.html',
-        day_of_week = datetime.strftime(datetime.now(), '%A'),
-        fc_date = datetime.strftime(datetime.now(), '%B %d, %Y'))
+        today_date = datetime.now().strftime('%A %B %d, %Y'))
     
 @app.route('/wkly_plt.png')
 def forecast_weekly_traffic():
-    fc = weekly_model.forecast(WEEKLY_FORECAST_STEPS)
+    fc = weekly_model.forecast(WEEKLY_FORECAST_STEPS).astype(np.int32)
+    fc = fc.apply(lambda x: 0 if x < 0 else x)
     x_pos = [dt.to_datetime().weekday() for dt in fc.index]
     y_pos = fc.tolist()
     labels = [dt.to_datetime().strftime('%a') for dt in fc.index]
-    plt.bar(x_pos,y_pos,alpha=0.5, align='center')
+    plt.bar(x_pos,y_pos,alpha=0.5, align='center', color='#ff3333')
     plt.xticks(x_pos,labels)
     plt.tick_params(axis='x', labelsize=10)
     image = StringIO()
-    plt.savefig(image)
+    plt.savefig(image,transparent=True)
     return image.getvalue(), 200, {'Content-Type': 'image/png'}    
 
 @app.route('/hrly_plt.png')
 def forecast_hourly_traffic():
-    fc = hourly_model.forecast(HOURLY_FORECAST_STEPS)
+    fc = hourly_model.forecast(HOURLY_FORECAST_STEPS).astype(np.int32)
+    fc = fc.apply(lambda x: 0 if x < 0 else x)
     x_pos = [dt.to_datetime().hour for dt in fc.index]
     y_pos = fc.tolist()
     labels = [dt.to_datetime().strftime('%I%p') for dt in fc.index]
-    plt.fill_between(x_pos,y_pos,alpha=0.3)
+    plt.plot(x_pos,y_pos,marker='o', color='#ff3333')
+    plt.fill_between(x_pos,y_pos,facecolor='#ff3333',alpha=0.3)
     for dt, cnt in zip(x_pos,y_pos):
        plt.text(dt, cnt, str(cnt),horizontalalignment='center', fontdict=text_font)
     plt.yticks([]);
     image = StringIO()
-    plt.savefig(image)
+    plt.savefig(image,transparent=True)
     return image.getvalue(), 200, {'Content-Type': 'image/png'}
 
 if __name__ == "__main__":
