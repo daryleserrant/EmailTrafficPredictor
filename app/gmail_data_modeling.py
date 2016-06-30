@@ -121,8 +121,7 @@ def build_hourly_arima_model(ts, params=None):
     D = params['D']
     Q = params['Q']
     
-    return SARIMAX(ts, order=(p,d,q), seasonal_order=(P,D,Q,HOURLY_PERIOD), simple_differencing=True,enforce_stationarity=False,
-         enforce_invertibility=False).fit()
+    return SARIMAX(ts, order=(p,d,q), seasonal_order=(P,D,Q,HOURLY_PERIOD), simple_differencing=True).fit()
 
 def build_weekly_arima_model(ts, params=None):
     '''

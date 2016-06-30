@@ -4,44 +4,42 @@
    text-align: center;
 }
 
-#date_time_disp {
-   background-color: #000000;
-   color: #ffffff;
-   border-radius: 25px;
-   padding: 10px;
-   width: 450px;
-}
-
 #hourly_pnl {
    display: inline-block;
-   text-align:center;
-   white-space: nowrap;
    width: 800px;
 }
 
-.time {
-   font-size: 100px;
-   font-weight: bold;
-   font-family: Impact, Charcoal, sans-serif;
+#weekly_pnl {
+   display:inline-block;
 }
 
-.date {
-   font-weight: bold;
-   display: block;
-   font-size: 20px;
-}
-
-#row {
+.row {
    white-space: nowrap;
    overflow: auto;
    min-width: 100%;
    padding-top: 10px;
 }
 
+.date_pnl {
+   padding-top: 35px;
+   float: right;
+   font-weight:bold;
+}
+
 #header {
   height: 55px;
   display:block;
   border-bottom: 1px solid black;
+}
+
+#hourly_img {
+  width:800px;
+  height:376px;
+}
+
+#weekly_img {
+  width: 522px;
+  height:376px;
 }
 
 #header h1 {
@@ -51,4 +49,27 @@
 
 h1 {
    font-family: Arial, Helvetica, sans-serif;
-}   
+   font-size: 31px;
+   font-weight:bold;
+}
+
+html, body {
+  height:100%;
+}
+
+.wrapper {
+   min-height: 100%;
+   height: auto !important;
+   height: 100%;
+   margin: 0 auto -4em;
+}
+
+.footer, .push {
+   height: 4em;
+}
+
+.footer {
+   text-align:center;
+   background: linear-gradient(to bottom, #ffffff, #bfbfbf);
+   font-weight:bold;
+}
