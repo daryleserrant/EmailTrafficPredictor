@@ -93,9 +93,11 @@ if __name__ == "__main__":
     
     # Update models
     weekly_model = gdm.build_weekly_arima_model(daily_ts)
-    hourly_model = gdm.build_hourly_arima_model(hourly_ts)
+    hourly_model = gdm.build_hourly_holt_winters_model(hourly_ts)
     
     weekly_model.save(weekly_model_file)
-    hourly_model.save(hourly_model_file)
+    
+    with open(hourly_model_file,'w') as f:
+        pickle.dump(hourly_model,f)
     
     save_training_data(daily_ts, hourly_ts)

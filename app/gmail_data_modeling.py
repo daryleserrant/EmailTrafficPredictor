@@ -6,6 +6,7 @@ from operator import itemgetter
 from multiprocessing import Pool
 from functools import partial
 from statsmodels.tsa.statespace.sarimax import SARIMAX
+import holtwinters as hw
 
 HOURLY_PERIOD = 24
 WEEKLY_PERIOD = 7
@@ -122,6 +123,21 @@ def build_hourly_arima_model(ts, params=None):
     Q = params['Q']
     
     return SARIMAX(ts, order=(p,d,q), seasonal_order=(P,D,Q,HOURLY_PERIOD), simple_differencing=True).fit()
+
+def build_hourly_holt_winters_model(ts):
+    '''
+    Builds an hourly additive holt winters model to forecast email traffic.
+    
+    Arguments:
+        ts - a time series
+    
+    Returns:
+        A tuple containing the alpha, beta, and gamma parameters returned from the algorithm along with the
+        data used for tuning.
+    '''
+    additive_hw = hw.additive(ts.tolist(),HOURLY_PERIOD,0)
+    
+    return (additive[1],additive[2],additive[3],HOURLY_PERIOD,ts)
 
 def build_weekly_arima_model(ts, params=None):
     '''
