@@ -76,11 +76,17 @@ scheduler = APScheduler()
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template('index.html',
-        today_date = datetime.now().strftime('%A %B %d, %Y'))
+    if mutex.acquire(False):
+        return render_template('index.html',
+            today_date = datetime.now().strftime('%A %B %d, %Y'))
+    else:
+        return "We are currently updating the forecast models. Please check back after a few minutes..."
     
 @app.route('/wkly_plt.png')
 def forecast_weekly_traffic():
+    '''
+    Creates a plot of the daily forecast for the next seven days
+    '''
     plt.figure()
     fc = weekly_model.forecast(WEEKLY_FORECAST_STEPS).astype(np.int32)
     fc = fc.apply(lambda x: 0 if x < 0 else x)
@@ -96,8 +102,12 @@ def forecast_weekly_traffic():
 
 @app.route('/hrly_plt.png')
 def forecast_hourly_traffic():
-    plt.figure(figsize=(15,6))
+    '''
+    Creates a plot of the hourly forecast for today
+    '''
     fc = hourly_model.forecast(HOURLY_FORECAST_STEPS).astype(np.int32)
+    mutex.release()
+    plt.figure(figsize=(15,6))
     fc = fc.apply(lambda x: 0 if x < 0 else x)
     x_pos = date2num(fc.index.tolist())
     y_pos = fc.tolist()

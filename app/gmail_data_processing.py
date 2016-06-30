@@ -202,7 +202,8 @@ def aggregate_hourly(df):
     '''
     hourly_agg = df[['year','month','day','hour','msg_id']].groupby(['year','month','day','hour']).count()
     
-    hourly_index = pd.date_range(df['date'].min().floor('H'), df['date'].max().floor('H'), freq='H')
+    hourly_index = pd.date_range(df['date'].min().floor('H'), df['date'].max().replace(hour=23, minute=0, second=0, microsecond=0),
+       freq='H', tz=timezone('US/Pacific'))
     hourly_counts = pd.Series(0, index=hourly_index)
     
     for dt in hourly_index:
@@ -224,7 +225,7 @@ def aggregate_daily(df):
     '''            
     daily_agg = df[['year','month','day','msg_id']].groupby(['year','month','day']).count()
     
-    daily_index = pd.date_range(df['date'].min(), df['date'].max(), freq='D', normalize=True)
+    daily_index = pd.date_range(df['date'].min(), df['date'].max(), freq='D', normalize=True, tz=timezone('US/Pacific'))
     daily_counts = pd.Series(0, index=daily_index)
     
     for dt in daily_index:

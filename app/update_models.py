@@ -10,7 +10,7 @@ import cPickle as pickle
 from pytz import timezone
 import sys
 
-def create_timeseries_data(messages):
+def create_timeseries_data(messages, last_updated):
     '''
     Create daily and hourly time series data using the email messages returned from the GMAIL API
     
@@ -22,10 +22,13 @@ def create_timeseries_data(messages):
     df = gdp.messages_to_dataframe(messages)
     
     if df is None:
-        hourly_index = pd.date_range(last_updated.floor('H'),datetime.now(timezone('US/Pacific')).replace(minute=0, second=0, microsecond=0), freq='H')
+        start = last_updated.floor('H')
+        end = datetime.now(timezone('US/Pacific')).replace(hour = 0, minute=0, second=0, microsecond=0)
+        
+        hourly_index = pd.date_range(start,end,freq='H',tz=timezone('US/Pacific'))
         hourly_counts = pd.Series(0, index=hourly_index)
         
-        daily_index = pd.date_range(last_updated, datetime.now(timezone('US/Pacific')), freq='D')
+        daily_index = pd.date_range(start,end, freq='D',tz=timezone(timezone('US/Pacific')))
         daily_counts = pd.Series(0, index=daily_index)
     else:
         # Remove all google hangout chat messages and messages that were sent by the user
@@ -39,26 +42,6 @@ def create_timeseries_data(messages):
     
     return (daily_counts, hourly_counts)
     
-def merge_timeseries_data(ts_A, ts_B):
-    '''
-    Merge two time series objects together into one time series object.
-    
-    Arguments:
-        ts_A, ts_B - Two time series objects
-    Returns:
-        Combination of both time series. Time series B merged into time series A.
-        In the case of duplicate indicies, the data in time series A will be replaced
-        with time series B data.
-    '''
-    merged = ts_A[:]
-    for dt,cnt in ts_B.iteritems():
-        if dt in merged:
-            merged[dt] = cnt
-        else:
-            entry = pd.Series([cnt], index=[dt])
-            merged = merged.append(entry, verify_integrity=True)
-    return merged
-
 def load_training_data():
     daily_ts = pd.read_pickle('../data/daily_ts.pkl')
     hourly_ts = pd.read_pickle('../data/hourly_ts.pkl')
@@ -86,11 +69,11 @@ if __name__ == "__main__":
 
     messages = gdc.collect_messages((datetime.now(timezone('US/Pacific')),last_updated))
     
-    daily_counts, hourly_counts = create_timeseries_data(messages)
+    daily_counts, hourly_counts = create_timeseries_data(messages, last_updated)
     
     # Merge the latest timeseries data into the training set.
-    daily_ts = merge_timeseries_data(daily_ts, daily_counts)
-    hourly_ts = merge_timeseries_data(hourly_ts, hourly_counts)
+    daily_ts = daily_ts.combine_first(daily_counts).tz_convert('US/Pacific')
+    hourly_ts = hourly_ts.combine_first(hourly_counts).tz_convert('US/Pacific')
     
     # Update models
     weekly_model = gdm.build_weekly_arima_model(daily_ts)
