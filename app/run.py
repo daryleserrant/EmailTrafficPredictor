@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_apscheduler import APScheduler
 from flask import render_template
-from gmail_traffic_forecaster import Forecaster
+from gmail_traffic_forecaster import DailyForecaster, HourlyForecaster
 from threading import Lock
 from datetime import datetime
 import pandas as pd
@@ -33,8 +33,8 @@ last_wk_mtime = 0
 hourly_model_file = None
 weekly_model_file = None
 
-weekly_model = Forecaster()
-hourly_model = Forecaster()
+weekly_model = DailyForecaster()
+hourly_model = HourlyForecaster()
 
 mutex = Lock()
 
