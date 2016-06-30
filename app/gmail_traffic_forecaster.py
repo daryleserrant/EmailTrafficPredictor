@@ -48,14 +48,14 @@ class HourlyForecaster(Forecaster):
             data = pickle.load(f)
             self.alpha = data[0]
             self.beta = data[1]
-            self.gamma = data[3]
-            self.m = data[4]
-            self.ts = data[5]
+            self.gamma = data[2]
+            self.m = data[3]
+            self.ts = data[4]
             
     def forecast(self, fc_steps):
-        results = hw.additive(self.ts.tolist(), m, fc_steps, self.alpha, self.beta, self.gamma)
-        start = datetime.utcnow().replace(minute = 0, second=0, microsecond=0)
+        results = hw.additive(self.ts.tolist(), self.m, fc_steps, self.alpha, self.beta, self.gamma)
+        start = self.ts.index.max()
         end = start + relativedelta.relativedelta(hours=fc_steps)
         date_index = pd.date_range(start,end, freq='H')
-        return pd.Series(results[0], index=date_index)
+        return pd.Series(results[0], index=date_index[1:])
     

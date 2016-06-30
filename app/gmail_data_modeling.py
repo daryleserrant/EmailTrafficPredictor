@@ -135,9 +135,9 @@ def build_hourly_holt_winters_model(ts):
         A tuple containing the alpha, beta, and gamma parameters returned from the algorithm along with the
         data used for tuning.
     '''
-    additive_hw = hw.additive(ts.tolist(),HOURLY_PERIOD,0)
+    additive_hw = hw.additive(ts.tolist(),HOURLY_PERIOD,24)
     
-    return (additive[1],additive[2],additive[3],HOURLY_PERIOD,ts)
+    return (additive_hw[1],additive_hw[2],additive_hw[3],HOURLY_PERIOD,ts)
 
 def build_weekly_arima_model(ts, params=None):
     '''

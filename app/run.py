@@ -43,7 +43,7 @@ app.config.from_object(Config())
 app.debug = True
 
 HOURLY_FORECAST_STEPS = 24
-WEEKLY_FORECAST_STEPS = 28
+WEEKLY_FORECAST_STEPS = 7
 
 def check_for_updates():
     '''
@@ -84,7 +84,7 @@ def forecast_weekly_traffic():
     plt.figure()
     fc = weekly_model.forecast(WEEKLY_FORECAST_STEPS).astype(np.int32)
     fc = fc.apply(lambda x: 0 if x < 0 else x)
-    x_pos = [dt.to_datetime().weekday() for dt in fc.index]
+    x_pos = date2num(fc.index.tolist())
     y_pos = fc.tolist()
     labels = [dt.to_datetime().strftime('%a') for dt in fc.index]
     plt.bar(x_pos,y_pos,alpha=0.5, align='center', color="#ff3333")
