@@ -9,29 +9,17 @@ import dateutil.relativedelta as relativedelta
 class Forecaster(object):
     
     def __init__(self):
-        self.model = None
-    
-    def update(self, model):
-        self.model = model
+        pass
     
     def forecast(self, fc_steps):
-        return self.model.forecast(steps=fc_steps)
-    
-    def get_residuals(self):
-        return self.model.resid
+        pass
     
     def load(self, filepath):
-        self.model = SARIMAXResults.load(filepath)
-    
-    def save(self, filepath):
-        self.model.save(filepath)
+        pass
 
 class DailyForecaster(Forecaster):
     
-    def __init__(self):
-        self.model = None
-    
-    def update(self, model):
+    def __init__(self, model=None):
         self.model = model
     
     def forecast(self, fc_steps):
@@ -39,9 +27,6 @@ class DailyForecaster(Forecaster):
     
     def load(self, filepath):
         self.model = SARIMAXResults.load(filepath)
-    
-    def save(self, filepath):
-        self.model.save(filepath)
         
 class HourlyForecaster(Forecaster):
 

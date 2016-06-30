@@ -7,7 +7,9 @@ from datetime import datetime
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sbn
+import numpy as np
 from StringIO import StringIO
+from matplotlib.dates import date2num
 import logging
 
 import os
@@ -79,32 +81,32 @@ def index():
     
 @app.route('/wkly_plt.png')
 def forecast_weekly_traffic():
+    plt.figure()
     fc = weekly_model.forecast(WEEKLY_FORECAST_STEPS).astype(np.int32)
     fc = fc.apply(lambda x: 0 if x < 0 else x)
     x_pos = [dt.to_datetime().weekday() for dt in fc.index]
     y_pos = fc.tolist()
     labels = [dt.to_datetime().strftime('%a') for dt in fc.index]
-    plt.bar(x_pos,y_pos,alpha=0.5, align='center', color='#ff3333')
+    plt.bar(x_pos,y_pos,alpha=0.5, align='center', color="#ff3333")
     plt.xticks(x_pos,labels)
     plt.tick_params(axis='x', labelsize=10)
     image = StringIO()
-    plt.savefig(image,transparent=True)
+    plt.savefig(image, transparent=True)
     return image.getvalue(), 200, {'Content-Type': 'image/png'}    
 
 @app.route('/hrly_plt.png')
 def forecast_hourly_traffic():
+    plt.figure(figsize=(15,6))
     fc = hourly_model.forecast(HOURLY_FORECAST_STEPS).astype(np.int32)
     fc = fc.apply(lambda x: 0 if x < 0 else x)
-    x_pos = [dt.to_datetime().hour for dt in fc.index]
+    x_pos = date2num(fc.index.tolist())
     y_pos = fc.tolist()
     labels = [dt.to_datetime().strftime('%I%p') for dt in fc.index]
-    plt.plot(x_pos,y_pos,marker='o', color='#ff3333')
-    plt.fill_between(x_pos,y_pos,facecolor='#ff3333',alpha=0.3)
-    for dt, cnt in zip(x_pos,y_pos):
-       plt.text(dt, cnt, str(cnt),horizontalalignment='center', fontdict=text_font)
-    plt.yticks([]);
+    plt.plot(x_pos, y_pos, color='#ff3333')
+    plt.fill_between(x_pos,y_pos,alpha=0.6,color='#ff3333')
+    plt.xticks(x_pos,labels)
     image = StringIO()
-    plt.savefig(image,transparent=True)
+    plt.savefig(image, transparent=True)
     return image.getvalue(), 200, {'Content-Type': 'image/png'}
 
 if __name__ == "__main__":
