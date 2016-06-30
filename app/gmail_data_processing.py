@@ -4,6 +4,7 @@ import cPickle as pickle
 from datetime import datetime
 import time
 import pytz
+from pytz import timezone
 
 def get_unique_labels(data):
     '''
@@ -160,16 +161,14 @@ def messages_to_dataframe(messages):
     for lbl in msg_labels:
        df['is_'+lbl.lower()] = has_label(df['label_ids'], lbl)
     
-    df['year'] = df['internal_date'].apply(lambda x: time.gmtime(int(x)/1000).tm_year)
-    df['month'] = df['internal_date'].apply(lambda x: time.gmtime(int(x)/1000).tm_mon)
-    df['day'] = df['internal_date'].apply(lambda x: time.gmtime(int(x)/1000).tm_mday)
-    df['hour'] = df['internal_date'].apply(lambda x: time.gmtime(int(x)/1000).tm_hour)
-    df['min'] = df['internal_date'].apply(lambda x: time.gmtime(int(x)/1000).tm_min)
-    df['sec'] = df['internal_date'].apply(lambda x: time.gmtime(int(x)/1000).tm_sec)
-    df['wday'] = df['internal_date'].apply(lambda x: time.gmtime(int(x)/1000).tm_wday)
-    df['yday'] = df['internal_date'].apply(lambda x: time.gmtime(int(x)/1000).tm_yday)
-    df['isdst'] = df['internal_date'].apply(lambda x: time.gmtime(int(x)/1000).tm_isdst)
-    df['date'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(int(x)/1000,tz=pytz.utc))
+    df['year'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(int(x)/1000,tz=timezone('US/Pacific')).year)
+    df['month'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(int(x)/1000,tz=timezone('US/Pacific')).month)
+    df['day'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(int(x)/1000,tz=timezone('US/Pacific')).day)
+    df['hour'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(int(x)/1000,tz=timezone('US/Pacific')).hour)
+    df['min'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(int(x)/1000,tz=timezone('US/Pacific')).minute)
+    df['sec'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(int(x)/1000,tz=timezone('US/Pacific')).second)
+    df['wday'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(int(x)/1000,tz=timezone('US/Pacific')).weekday())
+    df['date'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(int(x)/1000,tz=timezone('US/Pacific')))
     
     return df.drop('label_ids', axis=1)
 

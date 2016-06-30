@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from statsmodels.tsa.statespace.sarimax import SARIMAX
 from dateutil.relativedelta import relativedelta
 import cPickle as pickle
+from pytz import timezone
 import sys
 
 def create_timeseries_data(messages):
@@ -21,10 +22,10 @@ def create_timeseries_data(messages):
     df = gdp.messages_to_dataframe(messages)
     
     if df is None:
-        hourly_index = pd.date_range(last_updated.floor('H'),datetime.utcnow().replace(minute=0, second=0, microsecond=0), freq='H')
+        hourly_index = pd.date_range(last_updated.floor('H'),datetime.now(timezone('US/Pacific')).replace(minute=0, second=0, microsecond=0), freq='H')
         hourly_counts = pd.Series(0, index=hourly_index)
         
-        daily_index = pd.date_range(last_updated, datetime.utcnow(), freq='D')
+        daily_index = pd.date_range(last_updated, datetime.now(timezone('US/Pacific')), freq='D')
         daily_counts = pd.Series(0, index=daily_index)
     else:
         # Remove all google hangout chat messages and messages that were sent by the user
@@ -62,7 +63,7 @@ def load_training_data():
     daily_ts = pd.read_pickle('../data/daily_ts.pkl')
     hourly_ts = pd.read_pickle('../data/hourly_ts.pkl')
     
-    today = datetime.utcnow().replace(hour=0,minute=0, second=0, microsecond=0)
+    today = datetime.now(timezone('US/Pacific')).replace(hour=0,minute=0, second=0, microsecond=0)
     
     hourly_ts = hourly_ts[hourly_ts.index > (today - relativedelta(months=+6))]
     daily_ts = daily_ts[daily_ts.index > (today - relativedelta(years=+2))]
@@ -83,7 +84,7 @@ if __name__ == "__main__":
     # Get the last date the models were updated
     last_updated = daily_ts.index.max().to_datetime()
 
-    messages = gdc.collect_messages((datetime.utcnow(),last_updated))
+    messages = gdc.collect_messages((datetime.now(timezone('US/Pacific')),last_updated))
     
     daily_counts, hourly_counts = create_timeseries_data(messages)
     
