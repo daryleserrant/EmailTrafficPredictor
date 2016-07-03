@@ -49,12 +49,22 @@ def create_timeseries_data(messages, last_updated):
 
 
 def load_training_data():
+    '''
+    Load the time series data used to train the hourly and daily time series
+    models
+    
+    ToDo: Modify this function to read the training data out of a database (i.e. MongoDb)
+    instead of pickle files. That way, we can keep all the data collected from gmail.
+    '''
     daily_ts = pd.read_pickle('../data/daily_ts.pkl')
     hourly_ts = pd.read_pickle('../data/hourly_ts.pkl')
 
     today = datetime.now(timezone('US/Pacific')).replace(hour=0,
                                                          minute=0, second=0, microsecond=0)
 
+    # We only need hourly data that fall within the last 6 months and daily data that
+    # fall within the last two years. The author determined via experimentation that
+    # data within these ranges provides the best out of sample predictions.
     hourly_ts = hourly_ts[hourly_ts.index > (today - relativedelta(months=+6))]
     daily_ts = daily_ts[daily_ts.index > (today - relativedelta(years=+2))]
 
