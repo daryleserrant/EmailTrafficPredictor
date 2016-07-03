@@ -59,8 +59,7 @@ def check_for_updates():
     
         try:
             # Wait for the lock to be available
-            while not mutex.acquire():
-                pass
+            mutex.acquire():
             print "Reloading forecast models..."
             weekly_model.load(weekly_model_file)
             hourly_model.load(hourly_model_file)
