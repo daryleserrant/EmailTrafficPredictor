@@ -15,6 +15,7 @@ import logging
 import os
 import sys
 
+
 class Config(object):
     JOBS = [
         {
@@ -45,42 +46,41 @@ app.debug = True
 HOURLY_FORECAST_STEPS = 24
 WEEKLY_FORECAST_STEPS = 7
 
+
 def check_for_updates():
     '''
     Periodically poll the model pickle files for updates by examining the modified
     date field. Reload the models if the files have been updated.
     '''
     global last_hr_mtime, last_wk_mtime
-    
+
     hr_mtime = os.stat(hourly_model_file).st_mtime
     wk_mtime = os.stat(weekly_model_file).st_mtime
-    
+
     if hr_mtime != last_hr_mtime and wk_mtime != last_wk_mtime:
-    
-        try:
-            # Wait for the lock to be available
-            mutex.acquire():
-            print "Reloading forecast models..."
-            weekly_model.load(weekly_model_file)
-            hourly_model.load(hourly_model_file)
-            mutex.release()
-          
-            last_hr_mtime = hr_mtime
-            last_wk_mtime = wk_mtime
-        except:
-            print "Error reloading models!"
+        # Wait for the lock to be available
+        mutex.acquire()
+        print "Reloading forecast models..."
+        weekly_model.load(weekly_model_file)
+        hourly_model.load(hourly_model_file)
+        mutex.release()
+        
+        last_hr_mtime = hr_mtime
+        last_wk_mtime = wk_mtime
 
 scheduler = APScheduler()
+
 
 @app.route('/')
 @app.route('/index')
 def index():
     if mutex.acquire(False):
         return render_template('index.html',
-            today_date = datetime.now().strftime('%A %B %d, %Y'))
+                               today_date=datetime.now().strftime('%A %B %d, %Y'))
     else:
         return "We are currently updating the forecast models. Please check back after a few minutes..."
-    
+
+
 @app.route('/wkly_plt.png')
 def forecast_weekly_traffic():
     '''
@@ -92,12 +92,13 @@ def forecast_weekly_traffic():
     x_pos = date2num(fc.index.tolist())
     y_pos = fc.tolist()
     labels = [dt.to_datetime().strftime('%a') for dt in fc.index]
-    plt.bar(x_pos,y_pos,alpha=0.5, align='center', color="#ff3333")
-    plt.xticks(x_pos,labels)
+    plt.bar(x_pos, y_pos, alpha=0.5, align='center', color="#ff3333")
+    plt.xticks(x_pos, labels)
     plt.tick_params(axis='x', labelsize=10)
     image = StringIO()
     plt.savefig(image, transparent=True)
-    return image.getvalue(), 200, {'Content-Type': 'image/png'}    
+    return image.getvalue(), 200, {'Content-Type': 'image/png'}
+
 
 @app.route('/hrly_plt.png')
 def forecast_hourly_traffic():
@@ -106,14 +107,14 @@ def forecast_hourly_traffic():
     '''
     fc = hourly_model.forecast(HOURLY_FORECAST_STEPS).astype(np.int32)
     mutex.release()
-    plt.figure(figsize=(15,6))
+    plt.figure(figsize=(15, 6))
     fc = fc.apply(lambda x: 0 if x < 0 else x)
     x_pos = date2num(fc.index.tolist())
     y_pos = fc.tolist()
     labels = [dt.to_datetime().strftime('%I%p') for dt in fc.index]
     plt.plot(x_pos, y_pos, color='#ff3333')
-    plt.fill_between(x_pos,y_pos,alpha=0.6,color='#ff3333')
-    plt.xticks(x_pos,labels)
+    plt.fill_between(x_pos, y_pos, alpha=0.6, color='#ff3333')
+    plt.xticks(x_pos, labels)
     image = StringIO()
     plt.savefig(image, transparent=True)
     return image.getvalue(), 200, {'Content-Type': 'image/png'}
@@ -125,17 +126,17 @@ if __name__ == "__main__":
             weekly model - The path to the weekly model pickle file
             hourly model - The path to the hourly model pickle file
     '''
-    
+
     weekly_model_file = sys.argv[1]
     hourly_model_file = sys.argv[2]
-    
+
     last_hr_mtime = os.stat(hourly_model_file).st_mtime
     last_wk_mtime = os.stat(weekly_model_file).st_mtime
-    
+
     weekly_model.load(weekly_model_file)
     hourly_model.load(hourly_model_file)
-    
+
     scheduler.init_app(app)
     scheduler.start()
-    
-    app.run(host='0.0.0.0',port=8000)
+
+    app.run(host='0.0.0.0', port=8000)

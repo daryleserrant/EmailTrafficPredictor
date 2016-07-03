@@ -6,13 +6,14 @@ import time
 import pytz
 from pytz import timezone
 
+
 def get_unique_labels(data):
     '''
     Gets the unique message labels
-    
+
     Arguments:
         messages - a list of lists of message labels
-    
+
     Returns:
         the unique list of message labels
     '''
@@ -23,13 +24,14 @@ def get_unique_labels(data):
                 msg_labels.add(l)
     return list(msg_labels)
 
+
 def has_label(data, label):
     '''
     Checks if a message label is contained in each list of lists
-    
+
     Arguments:
         messages - a list of lists of message labels
-    
+
     Returns:
         a list of booleans
     '''
@@ -44,36 +46,39 @@ def has_label(data, label):
             results.append(False)
     return results
 
+
 def threads_to_dataframe(threads):
     '''
     Converts the list of threads obtained from the GMAIL API into a pandas data frame.
-    
+
     Arguments:
         threads - a list of threads retrieved from the GMAIL API
-    
+
     Returns:
         a pandas data frame
     '''
     history_id = []
     thread_id = []
     snippet = []
-    
+
     for t in threads:
         history_id.append(t['historyId'])
         thread_id.append(t['id'])
         snippet.append(t['snippet'])
-    
-    df_threads = pd.DataFrame({'id':thread_id, 'snippet':snippet, 'history_id':history_id})
-    
+
+    df_threads = pd.DataFrame(
+        {'id': thread_id, 'snippet': snippet, 'history_id': history_id})
+
     return df_threads
+
 
 def messages_to_dataframe(messages):
     '''
     Converts the list of messages obtained from the GMAIL API into a pandas dataframe.
-    
+
     Arguments:
         threads - a list of messages retrieved from the GMAIL API
-    
+
     Returns:
         a pandas data frame, None if the message list provided is empty
     '''
@@ -90,32 +95,32 @@ def messages_to_dataframe(messages):
     size_estimate = []
     snippet = []
     thread_id = []
-    
+
     # Return None if the message list is empty
     if not messages:
         return None
-    
+
     for m in messages:
         # Check for NoneTypes and integers. The GMAIL API will return None for any message it could not
-        # find in the user's inbox. 
-        if  type(m) == dict:
+        # find in the user's inbox.
+        if type(m) == dict:
             history_id.append(m['historyId'])
             msg_id.append(m['id'])
-            
+
             internal_date.append(m['internalDate'])
-            
+
             if 'labelIds' in m:
                 label_ids.append(m['labelIds'])
             else:
                 label_ids.append(None)
-                
+
             payload_body.append(m['payload']['body'])
-            
+
             if m['payload']['filename'] == '':
                 payload_filename.append(None)
             else:
                 payload_filename.append(m['payload']['filename'])
-            
+
             if 'headers' in m['payload']:
                 payload_headers.append(m['payload']['headers'])
             else:
@@ -138,48 +143,57 @@ def messages_to_dataframe(messages):
             size_estimate.append(m['sizeEstimate'])
             snippet.append(m['snippet'])
             thread_id.append(m['threadId'])
-    
+
     df = pd.DataFrame(
-    {
-        'history_id': history_id,
-        'msg_id': msg_id,
-        'internal_date': internal_date,
-        'label_ids' : label_ids,
-        'payload_body' : payload_body,
-        'payload_filename' : payload_filename,
-        'payload_headers' : payload_headers,
-        'payload_parts' : payload_parts,
-        'payload_part_id' : payload_part_id,
-        'payload_mime_type' : payload_mime_type,
-        'size_estimate' : size_estimate,
-        'snippet' : snippet,
-        'thread_id' : thread_id
-    })
-    
+        {
+            'history_id': history_id,
+            'msg_id': msg_id,
+            'internal_date': internal_date,
+            'label_ids': label_ids,
+            'payload_body': payload_body,
+            'payload_filename': payload_filename,
+            'payload_headers': payload_headers,
+            'payload_parts': payload_parts,
+            'payload_part_id': payload_part_id,
+            'payload_mime_type': payload_mime_type,
+            'size_estimate': size_estimate,
+            'snippet': snippet,
+            'thread_id': thread_id
+        })
+
     msg_labels = get_unique_labels(df['label_ids'])
-    
+
     for lbl in msg_labels:
-       df['is_'+lbl.lower()] = has_label(df['label_ids'], lbl)
-    
-    df['year'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(int(x)/1000,tz=timezone('US/Pacific')).year)
-    df['month'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(int(x)/1000,tz=timezone('US/Pacific')).month)
-    df['day'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(int(x)/1000,tz=timezone('US/Pacific')).day)
-    df['hour'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(int(x)/1000,tz=timezone('US/Pacific')).hour)
-    df['min'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(int(x)/1000,tz=timezone('US/Pacific')).minute)
-    df['sec'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(int(x)/1000,tz=timezone('US/Pacific')).second)
-    df['wday'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(int(x)/1000,tz=timezone('US/Pacific')).weekday())
-    df['date'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(int(x)/1000,tz=timezone('US/Pacific')))
-    
+        df['is_' + lbl.lower()] = has_label(df['label_ids'], lbl)
+
+    df['year'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(
+        int(x) / 1000, tz=timezone('US/Pacific')).year)
+    df['month'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(
+        int(x) / 1000, tz=timezone('US/Pacific')).month)
+    df['day'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(
+        int(x) / 1000, tz=timezone('US/Pacific')).day)
+    df['hour'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(
+        int(x) / 1000, tz=timezone('US/Pacific')).hour)
+    df['min'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(
+        int(x) / 1000, tz=timezone('US/Pacific')).minute)
+    df['sec'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(
+        int(x) / 1000, tz=timezone('US/Pacific')).second)
+    df['wday'] = df['internal_date'].apply(lambda x: datetime.fromtimestamp(
+        int(x) / 1000, tz=timezone('US/Pacific')).weekday())
+    df['date'] = df['internal_date'].apply(
+        lambda x: datetime.fromtimestamp(int(x) / 1000, tz=timezone('US/Pacific')))
+
     return df.drop('label_ids', axis=1)
+
 
 def aggregate_mail_counts(df, by='hour'):
     '''
     Aggregates mail counts hourly or daily.
-    
+
     Arguments:
         df - Pandas dataframe
         by - How to aggregate the mail counts        
-    
+
     Returns:
         a timeseries object containing the aggregated counts
     '''
@@ -188,62 +202,68 @@ def aggregate_mail_counts(df, by='hour'):
     elif by == 'day':
         return aggregate_daily(df)
     else:
-        return None    
-    
+        return None
+
+
 def aggregate_hourly(df):
     '''
     Aggregates mail counts hourly.
-    
+
     Arguments:
         df - Pandas dataframe     
-    
+
     Returns:
         a timeseries object containing the aggregated counts
     '''
-    hourly_agg = df[['year','month','day','hour','msg_id']].groupby(['year','month','day','hour']).count()
-    
+    hourly_agg = df[['year', 'month', 'day', 'hour', 'msg_id']
+                    ].groupby(['year', 'month', 'day', 'hour']).count()
+
     hourly_index = pd.date_range(df['date'].min().floor('H'), df['date'].max().replace(hour=23, minute=0, second=0, microsecond=0),
-       freq='H', tz=timezone('US/Pacific'))
+                                 freq='H', tz=timezone('US/Pacific'))
     hourly_counts = pd.Series(0, index=hourly_index)
-    
+
     for dt in hourly_index:
         try:
-            hourly_counts[dt] = hourly_agg.ix[dt.year,dt.month,dt.day,dt.hour]
+            hourly_counts[dt] = hourly_agg.ix[
+                dt.year, dt.month, dt.day, dt.hour]
         except:
-            hourly_counts[dt] = 0  
+            hourly_counts[dt] = 0
     return hourly_counts
+
 
 def aggregate_daily(df):
     '''
     Aggregates mail counts daily.
-    
+
     Arguments:
         df - Pandas dataframe     
-    
+
     Returns:
         a timeseries object containing the aggregated counts
-    '''            
-    daily_agg = df[['year','month','day','msg_id']].groupby(['year','month','day']).count()
-    
-    daily_index = pd.date_range(df['date'].min(), df['date'].max(), freq='D', normalize=True, tz=timezone('US/Pacific'))
+    '''
+    daily_agg = df[['year', 'month', 'day', 'msg_id']
+                   ].groupby(['year', 'month', 'day']).count()
+
+    daily_index = pd.date_range(df['date'].min(), df['date'].max(
+    ), freq='D', normalize=True, tz=timezone('US/Pacific'))
     daily_counts = pd.Series(0, index=daily_index)
-    
+
     for dt in daily_index:
         try:
-            daily_counts[dt] = daily_agg.ix[dt.year,dt.month,dt.day]
+            daily_counts[dt] = daily_agg.ix[dt.year, dt.month, dt.day]
         except:
             daily_counts[dt] = 0
     return daily_counts
-            
+
 if __name__ == '__main__':
 
     with open('threads.pkl', 'r') as f:
         threads = pickle.load(f)
     df = threads_to_dataframe(threads)
     df.to_csv('gmail_threads.csv', encoding='utf-8')
-    
+
     with open('emails.pkl', 'r') as f:
         messages = pickle.load(f)
-    
+
     df = messages_to_dataframe(messages)
     df.to_csv('gmail_messages.csv', encoding='utf-8')
