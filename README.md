@@ -23,6 +23,15 @@ Below is an overview of the code sections in this repo.
 - chrome - contains the google chrome application extension code
 - models - models are stored here
 
+## How to run the code
+1. Follow Step 1 and Step 2 in the [Python Quickstart Guide](https://developers.google.com/gmail/api/quickstart/python) to create a Google Developers Console project for the application and install the Google Client Library. Copy the generated client_secret.json to the /app folder in the project.
+2. Install [Flask-APScheduler](https://pypi.python.org/pypi/Flask-APScheduler) and statsmodels [0.8.0rc1](https://pypi.python.org/pypi/statsmodels).
+3. Create a data folder under the project root folder.
+4. In the terminal run create_initial_models.py to generate the hourly and weeky models.
+5. Schedule a cron job or an equivalent scheduling task that executes update_models.py on a daily basis.
+6. In the terminal run run.py to start the application. Navigate to [http://localhost:8000](http://localhost:8000) in your browser to see the application dashboard.
+7. If you have google chrome, install the application extension. Navigate to chrome://extensions/ in your Chrome browser, click on Load unpacked extension. In the browse window, navigate to the chrome folder in the application and click Ok.
+
 ##Next Steps
 - Add a database to store the results of message requests from Gmail.
 - Add an additional model to predict probabilities of receiving messaged tagged with various labels during different times of the day (i.e. Promotional, Social, Important, etc.).
