@@ -11,6 +11,7 @@ import numpy as np
 from StringIO import StringIO
 from matplotlib.dates import date2num
 import logging
+import math
 
 import os
 import sys
@@ -64,7 +65,7 @@ def check_for_updates():
         weekly_model.load(weekly_model_file)
         hourly_model.load(hourly_model_file)
         mutex.release()
-        
+
         last_hr_mtime = hr_mtime
         last_wk_mtime = wk_mtime
 
@@ -81,14 +82,47 @@ def index():
         return "We are currently updating the forecast models. Please check back after a few minutes..."
 
 
+def adjust_forecast(fc, which):
+    '''
+    Combines the forecasts produced by the hourly model and
+    the weekly model in an effort to produce a more
+    accurate forecast for today.
+
+    Arguments:
+       daily_fc - The day forecast produced by the weekly model
+       hourly_fc - The 24 hour forecast provided by the hourly model
+
+    Returns:
+       The adjusted day and 24 hour forecast
+    '''
+    ret_val = 2
+
+    if which == 'hour':
+        daily_fc = weekly_model.forecast(1)[0]
+        hourly_fc = fc
+        ret_val = 0
+    elif which == 'day':
+        hourly_fc = hourly_model.forecast(HOURLY_FORECAST_STEPS)
+        daily_fc = fc
+        ret_val = 1
+
+    hourly_total = hourly_fc.sum()
+    hourly_dist = hourly_fc / float(hourly_total)
+    avg = (daily_fc + hourly_total) / 2.
+    hourly_dist = hourly_dist * avg
+    adj_houry_fc = hourly_dist.apply(math.ceil)
+    return (adj_houry_fc, adj_houry_fc.sum(), None)[ret_val]
+
+
 @app.route('/wkly_plt.png')
 def forecast_weekly_traffic():
     '''
     Creates a plot of the daily forecast for the next seven days
     '''
     plt.figure()
-    fc = weekly_model.forecast(WEEKLY_FORECAST_STEPS).astype(np.int32)
-    fc = fc.apply(lambda x: 0 if x < 0 else x)
+    fc = weekly_model.forecast(WEEKLY_FORECAST_STEPS)
+    adjusted_day = adjust_forecast(fc[0], 'day')
+    fc[0] = adjusted_day
     x_pos = date2num(fc.index.tolist())
     y_pos = fc.tolist()
     labels = [dt.to_datetime().strftime('%a') for dt in fc.index]
@@ -105,10 +139,10 @@ def forecast_hourly_traffic():
     '''
     Creates a plot of the hourly forecast for today
     '''
-    fc = hourly_model.forecast(HOURLY_FORECAST_STEPS).astype(np.int32)
+    fc = hourly_model.forecast(HOURLY_FORECAST_STEPS)
+    fc = adjust_forecast(fc, 'hour')
     mutex.release()
     plt.figure(figsize=(15, 6))
-    fc = fc.apply(lambda x: 0 if x < 0 else x)
     x_pos = date2num(fc.index.tolist())
     y_pos = fc.tolist()
     labels = [dt.to_datetime().strftime('%I%p') for dt in fc.index]

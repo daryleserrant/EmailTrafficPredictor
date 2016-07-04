@@ -5,6 +5,7 @@ from statsmodels.tsa.statespace.sarimax import SARIMAX, SARIMAXResults
 import holtwinters as hw
 from datetime import datetime, timedelta
 import dateutil.relativedelta as relativedelta
+import math
 
 
 class Forecaster(object):
@@ -64,7 +65,9 @@ class DailyForecaster(Forecaster):
         Returns:
           A pandas series containing the forecasts
         '''
-        return self.model.forecast(steps=fc_steps)
+        fc = self.model.forecast(steps=fc_steps).apply(
+            math.ceil).astype(np.int32)
+        return fc.apply(lambda x: 0 if x < 0 else x)
 
     def load(self, filepath):
         '''
@@ -142,7 +145,9 @@ class HourlyForecaster(Forecaster):
         '''
         results = hw.additive(self.ts.tolist(), self.m,
                               fc_steps, self.alpha, self.beta, self.gamma)
+        fc = map((lambda x: 0 if math.ceil(x) <
+                  0 else math.ceil(x)), results[0])
         start = self.ts.index.max()
         end = start + relativedelta.relativedelta(hours=fc_steps)
         date_index = pd.date_range(start, end, freq='H')
-        return pd.Series(results[0], index=date_index[1:])
+        return pd.Series(fc, index=date_index[1:])
