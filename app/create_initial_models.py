@@ -40,7 +40,7 @@ def create_timeseries_data(messages):
         daily_counts = gdp.aggregate_mail_counts(df, by='day')
 
         hourly_counts = gdp.fill_dates_between(hourly_counts, today, by='hour')
-        daily_counts = gdp.fill_dates_between(hourly_counts, today, by='day')
+        daily_counts = gdp.fill_dates_between(daily_counts, today, by='day')
 
     return (daily_counts, hourly_counts)
 
