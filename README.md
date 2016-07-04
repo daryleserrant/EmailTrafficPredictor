@@ -1,7 +1,7 @@
 #Email Traffic Predictor
 If you find yourself checking your email multiple times a day and struggle with productivity, this application is just for you!
 ##Overview
-The Email Traffic Predictor is a software application and chrome extension that provides the user 24-hour and 7-day forecasts of email traffic from their gmail account. The application helps users determine the optimial times during the workday to check email.
+The Email Traffic Predictor is a software application and chrome extension that provides the user 24-hour and 7-day forecasts of email traffic from their gmail account. The application helps users determine the optimal times during the workday to check email.
 ##Check out the Application Dashboard
 You can see an example of the predictions provided by the application by going [here](52.91.14.14). At the moment, the application only provides forecasts of email traffic from my personal gmail account. In the future, I will extend the application to provide forecasts for other users as well.
 ##How it works
