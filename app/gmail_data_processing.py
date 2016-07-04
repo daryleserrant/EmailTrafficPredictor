@@ -5,6 +5,7 @@ from datetime import datetime
 import time
 import pytz
 from pytz import timezone
+from dateutil.relativedelta import relativedelta
 
 
 def get_unique_labels(data):
@@ -254,6 +255,35 @@ def aggregate_daily(df):
         except:
             daily_counts[dt] = 0
     return daily_counts
+
+
+def fill_dates_between(ts, dt, by='hour'):
+    '''
+    Appends to the timeseries data ranging from between the latest date in the timeseries and a specified date
+
+    Arguments:
+        ts - time series to append data to
+        dt - a date 
+    Returns:
+        A timeseries object
+    '''
+    result = None
+
+    if by == 'day':
+        end = dt.replace(hour=0, minute=0, second=0,
+                         microsecond=0) - relativedelta(days=1)
+        miss_index = pd.date_range(ts.index.max(), end, freq='D')
+        miss_series = pd.Series(0, index=miss_index)
+        result = ts.combine_first(miss_series).tz_convert('US/Pacific')
+    elif by == 'hour':
+        end = dt.replace(hour=23, minute=0, second=0,
+                         microsecond=0) - relativedelta(days=1)
+        miss_index = pd.date_range(ts.index.max(), end, freq='H')
+        miss_series = pd.Series(0, index=miss_index)
+        result = ts.combine_first(miss_series).tz_convert('US/Pacific')
+
+    return result
+
 
 if __name__ == '__main__':
 

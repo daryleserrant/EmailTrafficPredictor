@@ -23,7 +23,7 @@ def create_timeseries_data(messages, last_updated):
     df = gdp.messages_to_dataframe(messages)
 
     if df is None:
-        start = last_updated.floor('H')
+        start = last_updated.replace(hour=0, minute=0, second=0, microsecond=0)
         end = datetime.now(timezone('US/Pacific')).replace(hour=0,
                                                            minute=0, second=0, microsecond=0)
 
@@ -45,6 +45,11 @@ def create_timeseries_data(messages, last_updated):
         hourly_counts = gdp.aggregate_mail_counts(df, by='hour')
         daily_counts = gdp.aggregate_mail_counts(df, by='day')
 
+        end = datetime.now(timezone('US/Pacific')).replace(hour=0,
+                                                           minute=0, second=0, microsecond=0)
+        hourly_counts = gdp.fill_dates_between(hourly_counts, end, by='hour')
+        daily_counts = gdp.fill_dates_between(daily_counts, end, by='day')
+
     return (daily_counts, hourly_counts)
 
 
@@ -52,7 +57,7 @@ def load_training_data():
     '''
     Load the time series data used to train the hourly and daily time series
     models
-    
+
     ToDo: Modify this function to read the training data out of a database (i.e. MongoDb)
     instead of pickle files. That way, we can keep all the data collected from gmail.
     '''
