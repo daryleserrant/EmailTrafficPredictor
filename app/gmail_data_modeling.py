@@ -1,3 +1,12 @@
+'''
+Gmail Data Modeling Module
+
+This module defines functions for building and validating
+SARIMA and Holt Winters Time Series Models.
+
+Author: Daryle J. Serrant
+'''
+
 import pandas as pd
 import numpy as np
 import gmail_data_collection as gdc

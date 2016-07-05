@@ -1,3 +1,13 @@
+'''
+Application Module
+
+This file defines the logic for the Flask application. This application
+displays a simple dashboard for presenting the results of the forecast
+and updates the models on a periodic basis.
+
+Author: Daryle J. Serrant
+'''
+
 from flask import Flask
 from flask_apscheduler import APScheduler
 from flask import render_template
@@ -14,16 +24,14 @@ import logging
 import math
 
 import os
-import sys
-
 
 class Config(object):
     JOBS = [
         {
-            'id': 'job_modelupate',
+            'id': 'job_modelupdate',
             'func': '__main__:check_for_updates',
             'trigger': 'interval',
-            'seconds': 30
+            'seconds': 60
         }
     ]
 
@@ -32,8 +40,8 @@ class Config(object):
 last_hr_mtime = 0
 last_wk_mtime = 0
 
-hourly_model_file = None
-weekly_model_file = None
+hourly_model_file = "../models/hourly_model.pkl"
+weekly_model_file = "../models/weekly_model.pkl"
 
 weekly_model = DailyForecaster()
 hourly_model = HourlyForecaster()
@@ -160,9 +168,8 @@ if __name__ == "__main__":
             weekly model - The path to the weekly model pickle file
             hourly model - The path to the hourly model pickle file
     '''
-
-    weekly_model_file = sys.argv[1]
-    hourly_model_file = sys.argv[2]
+    
+    logging.basicConfig()
 
     last_hr_mtime = os.stat(hourly_model_file).st_mtime
     last_wk_mtime = os.stat(weekly_model_file).st_mtime

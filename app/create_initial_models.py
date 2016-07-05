@@ -11,7 +11,7 @@ from pytz import timezone
 import sys
 
 
-def create_timeseries_data(messages):
+def create_timeseries_data(messages, today):
     '''
     Create daily and hourly time series data using the email messages returned from the GMAIL API
 
@@ -20,7 +20,7 @@ def create_timeseries_data(messages):
     Returns:
         A tuple containing the daily and hourly time series data
     '''
-    df = gdp.messages_to_dataframe(messages, today)
+    df = gdp.messages_to_dataframe(messages)
     daily_counts = None
     hourly_counts = None
 
@@ -35,8 +35,7 @@ def create_timeseries_data(messages):
         if 'is_chat' in df:
             df = df[~df['is_chat']]
 
-        hourly_counts = gdp.aggregate_mail_counts(
-            df[df.index > (today - relativedelta(months=+6))], by='hour')
+        hourly_counts = gdp.aggregate_mail_counts(df[df['date'] > (today - relativedelta(months=+6))], by='hour')
         daily_counts = gdp.aggregate_mail_counts(df, by='day')
 
         hourly_counts = gdp.fill_dates_between(hourly_counts, today, by='hour')

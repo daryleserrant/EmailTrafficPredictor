@@ -1,3 +1,12 @@
+'''
+Gmail Data Processing Module
+
+This module defines functions for processing raw data into
+formats suitable for analysis and model building
+
+Author: Daryle J. Serrant
+'''
+
 import pandas as pd
 import numpy as np
 import cPickle as pickle

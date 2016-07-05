@@ -1,3 +1,12 @@
+'''
+Gmail Traffic Forecaster Module
+
+This module defines several classes that produce email traffic
+forecasts. 
+
+Author: Daryle J. Serrant
+'''
+
 import pandas as pd
 import numpy as np
 import cPickle as pickle

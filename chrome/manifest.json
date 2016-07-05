@@ -6,10 +6,10 @@
   "icons": { "16": "icon_16.png", "128": "icon_128.png" },
   "app": {
      "urls": [
-     "http://127.0.0.1:5000"
+     "http://127.0.0.1:8000"
      ],
      "launch": {
-     "web_url": "http://127.0.0.1:5000"
+     "web_url": "http://127.0.0.1:8000"
    }
    },
    "permissions": [

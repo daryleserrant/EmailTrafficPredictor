@@ -1,6 +1,17 @@
+'''
+Update Models Script
+
+This script updates the hourly and weekly forecasting models with the latest
+data from Gmail since the last update date. This script should be called
+on a nightly basis using UNIX cron or other similar job scheduling systems.
+
+Author: Daryle J. Serrant
+'''
+
 import pandas as pd
 import numpy as np
 import gmail_data_collection as gdc
+
 import gmail_data_processing as gdp
 import gmail_data_modeling as gdm
 from datetime import datetime, timedelta
@@ -67,12 +78,10 @@ def load_training_data():
     today = datetime.now(timezone('US/Pacific')).replace(hour=0,
                                                          minute=0, second=0, microsecond=0)
 
-    # We only need hourly data that fall within the last 6 months and daily data that
-    # fall within the last two years. The author determined via experimentation that
+    # We only need hourly data that fall within the last 6 months. The author determined
+    # via experimentation that
     # data within these ranges provides the best out of sample predictions.
     hourly_ts = hourly_ts[hourly_ts.index > (today - relativedelta(months=+6))]
-    daily_ts = daily_ts[daily_ts.index > (today - relativedelta(years=+2))]
-
     return (daily_ts, hourly_ts)
 
 

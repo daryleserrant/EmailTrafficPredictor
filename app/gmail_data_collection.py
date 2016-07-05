@@ -1,3 +1,11 @@
+'''
+Gmail Data Collection Module
+
+This module defines functions for retrieving messages from Gmail using the GMAIL API
+
+Author: Daryle J. Serrant
+'''
+
 from apiclient.discovery import build
 from apiclient.http import BatchHttpRequest
 from httplib2 import Http
