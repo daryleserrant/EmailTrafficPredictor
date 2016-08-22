@@ -2,8 +2,6 @@
 If you find yourself checking your email multiple times a day and struggle with productivity, this application is just for you!
 ##Overview
 The Email Traffic Predictor is a software application and chrome extension that provides the user 24-hour and 7-day forecasts of email traffic from their gmail account. The application helps users determine the optimal times during the workday to check email.
-##Check out the Application Dashboard
-You can see an example of the predictions provided by the application by going [here](52.91.14.14). At the moment, the application only provides forecasts of email traffic from my personal gmail account. In the future, I will extend the application to provide forecasts for other users as well.
 ##How it works
 ### The Data
 For the sake of convenience, I used my email archieve to build the application. The [Gmail API](https://developers.google.com/gmail/api/) was used to retrieve the data. The dataset contains 38,574 messages of various sizes and variety (promotional, social, forums, etc.) dating back to 2006. Google chat messages and messages sent by me were exluded from the dataset before model building.
@@ -36,4 +34,5 @@ Below is an overview of the code sections in this repo.
 - Add a database to store the results of message requests from Gmail.
 - Add an additional model to predict probabilities of receiving messaged tagged with various labels during different times of the day (i.e. Promotional, Social, Important, etc.).
 - Create a google gagdet to provide the user a convenient way of viewing the forecasts in their Gmail account.
-- Make the application scalable for use by multiple users.
+- Make the application scalable for use by multiple users. At the moment the parameters of the time series models are optimized for my personal email traffic only. Models that are generalizable for multiple users will need to be explored.
+- Adjust models to account for outgoing emails - i.e replies to messages sent by user. 
